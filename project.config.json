@@ -42,7 +42,7 @@
   },
   "compileType": "miniprogram",
   "libVersion": "2.19.4",
-  "appid": "wx8b230a3180e95ad8",
+  "appid": "",
   "projectname": "苹果检测系统",
   "debugOptions": {
     "hidedInDevtools": []
