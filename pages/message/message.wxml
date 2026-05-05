@@ -1,0 +1,101 @@
+<view class="page">
+  <view class="user-card">
+    <view class="user-title">当前用户</view>
+    <view class="user-name">{{currentUser.username || '未登录'}}</view>
+    <view class="user-account">账号：{{currentUser.account || '-'}}</view>
+    <view class="user-tag" wx:if="{{currentUser.loginType === 'openid'}}">微信临时openid登录</view>
+  </view>
+
+  <view class="button-list">
+    <view class="button-item" bindtap="openProfileModal">
+      <text>修改用户名和密码</text>
+      <text class="arrow">›</text>
+    </view>
+    <view class="button-item" bindtap="showUserAgreement">
+      <text>用户协议</text>
+      <text class="arrow">›</text>
+    </view>
+    <view class="button-item" bindtap="showPrivacyPolicy">
+      <text>隐私政策</text>
+      <text class="arrow">›</text>
+    </view>
+    <view class="button-item" bindtap="showContactUs">
+      <text>联系我们</text>
+      <text class="arrow">›</text>
+    </view>
+    <view class="button-item" bindtap="showFeedback">
+      <text>问题与建议</text>
+      <text class="arrow">›</text>
+    </view>
+    <view class="button-item button-item-danger" bindtap="logout">
+      <text>退出登录</text>
+      <text class="arrow">›</text>
+    </view>
+  </view>
+
+  <view class="feedback-modal" wx:if="{{showFeedbackModal}}">
+    <view class="modal-mask" bindtap="hideFeedbackModal"></view>
+    <view class="modal-content">
+      <view class="modal-title">问题与建议</view>
+      <view class="modal-body">
+        <input
+          class="feedback-input"
+          placeholder="请输入您的邮箱（选填）"
+          bindinput="onEmailInput"
+          value="{{feedbackEmail}}"
+        />
+        <textarea
+          class="feedback-textarea"
+          placeholder="请输入您的问题或建议"
+          bindinput="onSuggestionInput"
+          value="{{feedbackSuggestion}}"
+          auto-height
+        />
+      </view>
+      <view class="modal-footer">
+        <button class="modal-btn cancel" bindtap="hideFeedbackModal">取消</button>
+        <button class="modal-btn submit" bindtap="submitFeedback">提交</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="feedback-modal" wx:if="{{showProfileModal}}">
+    <view class="modal-mask" bindtap="hideProfileModal"></view>
+    <view class="modal-content">
+      <view class="modal-title">修改资料</view>
+      <view class="modal-body">
+        <input
+          class="feedback-input"
+          placeholder="请输入新的用户名"
+          value="{{profileForm.username}}"
+          data-field="username"
+          bindinput="onProfileInput"
+        />
+        <input
+          class="feedback-input"
+          placeholder="请输入新的密码，不改可留空"
+          password
+          value="{{profileForm.password}}"
+          data-field="password"
+          bindinput="onProfileInput"
+        />
+        <input
+          class="feedback-input"
+          placeholder="请再次输入新的密码"
+          password
+          value="{{profileForm.confirmPassword}}"
+          data-field="confirmPassword"
+          bindinput="onProfileInput"
+        />
+      </view>
+      <view class="modal-footer">
+        <button class="modal-btn cancel" bindtap="hideProfileModal">取消</button>
+        <button class="modal-btn submit" bindtap="submitProfileUpdate" loading="{{savingProfile}}">保存</button>
+      </view>
+    </view>
+  </view>
+
+  <view class="back-button-container">
+    <button class="back-button" bindtap="goBack">返回首页</button>
+  </view>
+</view>

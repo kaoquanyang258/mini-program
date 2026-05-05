@@ -1,0 +1,10 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/message/message",
+    "pages/currentmodel/currentmodel"
+  ],
+  "window": {
+    "navigationBarTitleText": ""
+  }
+}

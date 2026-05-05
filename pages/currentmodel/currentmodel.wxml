@@ -1,0 +1,54 @@
+<view class="page">
+  <view class="hero-card">
+    <view class="eyebrow">Model Switcher</view>
+    <view class="hero-title">当前检测模型</view>
+    <view class="hero-desc">切换后会影响后续上传图片的检测结果，历史记录不会被改写。</view>
+  </view>
+
+  <view class="current-card">
+    <view class="current-label">当前使用</view>
+    <view class="current-name">{{currentModelName}}</view>
+    <!-- <view class="current-folder">G:\YOLOv11_test\result\{{currentModelFolder}}\weights\best.pt</view> -->
+    <view class="current-status">{{statusText}}</view>
+  </view>
+
+  <view class="section-title">可选模型</view>
+  <view class="model-list">
+    <block wx:for="{{modelOptions}}" wx:key="key">
+      <view class="model-card {{item.key === currentModelKey ? 'model-card-active' : ''}}">
+        <view class="model-card-head">
+          <view>
+            <view class="model-name">{{item.name}}</view>
+            <view class="model-folder">{{item.folder}}</view>
+          </view>
+          <view class="model-badge {{item.key === currentModelKey ? 'model-badge-active' : ''}}">
+            {{item.key === currentModelKey ? '当前使用' : '可切换'}}
+          </view>
+        </view>
+
+        <view class="model-desc">{{item.description}}</view>
+        <!-- <view class="model-path">权重文件：G:\YOLOv11_test\result\{{item.folder}}\weights\best.pt</view> -->
+
+        <button
+          class="switch-button {{item.key === currentModelKey ? 'switch-button-active' : ''}}"
+          data-key="{{item.key}}"
+          bindtap="selectModel"
+          disabled="{{isSaving || item.key === currentModelKey}}"
+          loading="{{isSaving && pendingModelKey === item.key}}"
+        >
+          {{item.key === currentModelKey ? '正在使用' : '切换到此模型'}}
+        </button>
+      </view>
+    </block>
+  </view>
+
+  <view class="tips-card">
+    <view class="tips-title">说明</view>
+    <view class="tips-text">默认模型：YOLO11s V3</view>
+    <view class="tips-text">切换成功后，新的检测请求会自动使用当前选中的模型。</view>
+    <view class="tips-text" wx:if="{{updatedAt}}">最近切换时间：{{updatedAt}}</view>
+    <view class="tips-text" wx:if="{{isLoading}}">正在从后端同步模型配置...</view>
+  </view>
+
+  <button class="back-button" bindtap="goBack">返回首页</button>
+</view>

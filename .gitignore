@@ -1,0 +1,11 @@
+.vscode/
+.cloudbase/
+.codex_tmp/
+
+project.private.config.json
+project.local.config.json
+
+node_modules/
+
+.DS_Store
+Thumbs.db

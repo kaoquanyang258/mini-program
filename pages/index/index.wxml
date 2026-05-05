@@ -1,0 +1,227 @@
+<image src="/images/background.jpg" class="background-image"></image>
+
+<view class="container">
+  <view class="header">
+    <view class="header-title">苹果检测助手</view>
+  </view>
+
+  <view class="status-bar">
+    <view class="status-left">
+      <text class="status-label">连接：</text>
+      <text class="connection-status {{connectionStatus === '已连接' ? 'connected' : 'disconnected'}}">
+        {{connectionStatus}}
+      </text>
+    </view>
+    <view class="status-center">
+      <text class="user-status" wx:if="{{currentUser}}">{{currentUser.username}}</text>
+      <text class="user-status user-status-empty" wx:else>未登录</text>
+    </view>
+    <view class="status-right">
+      <text class="operation-status">{{operationStatus}}</text>
+    </view>
+  </view>
+
+  <scroll-view class="content-area" scroll-y>
+    <view class="button-container" wx:if="{{originalImages.length === 0}}">
+      <view class="button-section">
+        <button class="main-button" bindtap="uploadImage" style="position: relative; left: -27rpx; top: -56rpx">
+          <view class="button-icon button-icon-upload"></view>
+          <view class="button-text">上传图片并检测</view>
+        </button>
+
+        <button class="main-button main-button-half" bindtap="viewHistory" style="width: 293rpx; display: flex; box-sizing: border-box; left: -27rpx; top: -43rpx; position: relative">
+          <view class="button-icon button-icon-history"></view>
+          <view class="button-text">查看历史记录</view>
+        </button>
+
+        <button class="main-button main-button-half" bindtap="message" style="width: 293rpx; display: flex; box-sizing: border-box; left: -27rpx; top: -20rpx; position: relative">
+          <view class="button-icon button-icon-message"></view>
+          <view class="button-text">其它</view>
+        </button>
+
+        <button class="main-button main-button-half" bindtap="model" style="width: 293rpx; display: flex; box-sizing: border-box; left: -27rpx; top: -4rpx; position: relative">
+          <view class="button-icon button-icon-model"></view>
+          <view class="button-text">当前检测模型</view>
+        </button>
+      </view>
+    </view>
+
+    <view class="image-container" wx:if="{{originalImages.length > 0}}">
+      <view class="image-section">
+        <view class="image-title">
+          原始图片
+          <text wx:if="{{originalImages.length > 1}}" class="image-index">
+            {{currentIndex + 1}}/{{originalImages.length}}
+          </text>
+        </view>
+        <swiper class="image-swiper" current="{{currentIndex}}" bindchange="onSwiperChange" circular="false">
+          <block wx:for="{{originalImages}}" wx:key="index">
+            <swiper-item>
+              <image src="{{item}}" mode="aspectFit" class="image-display"></image>
+            </swiper-item>
+          </block>
+        </swiper>
+      </view>
+
+      <view class="image-section" wx:if="{{resultImages.length > 0}}">
+        <view class="image-title">
+          检测结果
+          <text class="detection-count" wx:if="{{detectionCounts[currentIndex] > 0}}">
+            发现 {{detectionCounts[currentIndex]}} 个苹果
+          </text>
+          <text wx:if="{{originalImages.length > 1}}" class="image-index">
+            {{currentIndex + 1}}/{{originalImages.length}}
+          </text>
+        </view>
+        <swiper class="image-swiper" current="{{currentIndex}}" bindchange="onSwiperChange" circular="false">
+          <block wx:for="{{resultImages}}" wx:key="index">
+            <swiper-item>
+              <image src="{{item || '/images/placeholder.jpg'}}" mode="aspectFit" class="image-display"></image>
+            </swiper-item>
+          </block>
+        </swiper>
+
+        <view class="summary-panel" wx:if="{{totalImageCount > 0}}">
+          <view class="summary-title">本次检测统计</view>
+          <view class="summary-grid">
+            <view class="summary-item">
+              <text class="summary-label">图片总数</text>
+              <text class="summary-value">{{totalImageCount}}</text>
+            </view>
+            <view class="summary-item">
+              <text class="summary-label">苹果总数</text>
+              <text class="summary-value summary-value-highlight">{{totalAppleCount}}</text>
+            </view>
+          </view>
+        </view>
+      </view>
+    </view>
+  </scroll-view>
+
+  <view class="bottom-buttons" wx:if="{{originalImages.length > 0}}">
+    <button class="action-button" bindtap="uploadImage">
+      <view class="button-mini-icon button-mini-icon-upload"></view>
+      <text class="button-text">重新检测</text>
+    </button>
+
+    <button class="action-button" bindtap="saveToAlbum" disabled="{{!resultImageTempPaths[currentIndex]}}">
+      <view class="button-mini-icon button-mini-icon-save"></view>
+      <text class="button-text">保存结果</text>
+    </button>
+
+    <button class="action-button" bindtap="viewHistory">
+      <view class="button-mini-icon button-mini-icon-history"></view>
+      <text class="button-text">历史记录</text>
+    </button>
+
+    <button class="action-button secondary" bindtap="clearImages">
+      <view class="button-mini-icon button-mini-icon-clear"></view>
+      <text class="button-text">清空</text>
+    </button>
+  </view>
+
+  <view class="history-modal" wx:if="{{showHistory}}">
+    <view class="modal-overlay" bindtap="hideHistory" catchtouchmove="catchTouchMove"></view>
+    <view class="modal-content" catchtouchmove="catchTouchMove">
+      <view class="modal-header">
+        <view class="modal-title-wrap">
+          <view class="modal-back" wx:if="{{showHistoryGroupDetail}}" bindtap="backToHistoryGroups">‹</view>
+          <view class="modal-title">{{showHistoryGroupDetail ? '组内详情' : '历史记录'}}</view>
+        </view>
+        <view class="modal-close" bindtap="hideHistory">×</view>
+      </view>
+      <view class="history-group-summary" wx:if="{{showHistoryGroupDetail && selectedHistoryGroup}}">
+        <view class="history-group-summary-date">{{selectedHistoryGroup.date}}</view>
+        <view class="history-group-summary-text">
+          共 {{selectedHistoryGroup.imageCount}} 张图片，检测到 {{selectedHistoryGroup.totalAppleCount}} 个苹果
+        </view>
+      </view>
+      <view class="history-list-container">
+        <scroll-view class="history-list" scroll-y enhanced="{{true}}" bounces="{{true}}" style="{{historyListHeight ? 'height: ' + historyListHeight + 'px;' : ''}}">
+          <block wx:if="{{!showHistoryGroupDetail}}">
+            <block wx:for="{{historyGroups}}" wx:key="id">
+              <view class="history-item history-group-item" bindtap="openHistoryGroup" data-index="{{index}}">
+                <view class="history-item-header">
+                  <text class="history-date">{{item.date}}</text>
+                  <text class="history-count-badge">{{item.totalAppleCount}} 个苹果</text>
+                </view>
+                <view class="history-group-meta">
+                  <text class="history-group-text">图片数量：{{item.imageCount}} 张</text>
+                  <text class="history-group-text">苹果总数：{{item.totalAppleCount}} 个</text>
+                </view>
+                <view class="history-group-entry">点击查看组内每张图片的信息</view>
+              </view>
+            </block>
+            <view class="history-empty" wx:if="{{historyGroups.length === 0}}">
+              <view class="empty-icon">📭</view>
+              <view class="empty-text">暂无历史记录</view>
+            </view>
+            <view class="scroll-hint" wx:if="{{historyGroups.length > 2 && showScrollHint}}">
+              <text class="scroll-hint-text">滑动查看更多</text>
+            </view>
+          </block>
+          <block wx:else>
+            <block wx:for="{{selectedHistoryGroup.records}}" wx:key="id">
+              <view class="history-item">
+                <view class="history-item-header">
+                  <text class="history-date">{{item.imageLabel}}</text>
+                  <text class="history-count-badge">{{item.detection_count}} 个苹果</text>
+                </view>
+                <view class="history-item-preview">
+                  <view class="history-info">
+                    <view class="history-id">{{item.date}}</view>
+                    <view class="history-actions">
+                      <button class="history-action-btn" bindtap="viewGroupOriginalImage" data-record-index="{{index}}">原图</button>
+                      <button class="history-action-btn" bindtap="viewGroupResultImage" data-record-index="{{index}}" wx:if="{{item.result_image}}">结果</button>
+                      <button class="history-action-btn" bindtap="viewGroupDetails" data-record-index="{{index}}">详情</button>
+                    </view>
+                  </view>
+                </view>
+              </view>
+            </block>
+            <view class="history-empty" wx:if="{{!selectedHistoryGroup || selectedHistoryGroup.records.length === 0}}">
+              <view class="empty-icon">📭</view>
+              <view class="empty-text">该组暂无图片记录</view>
+            </view>
+            <view class="scroll-hint" wx:if="{{selectedHistoryGroup && selectedHistoryGroup.records.length > 2 && showScrollHint}}">
+              <text class="scroll-hint-text">滑动查看更多</text>
+            </view>
+          </block>
+        </scroll-view>
+      </view>
+      <view class="modal-footer">
+        <button class="btn-clear" bindtap="clearHistory">
+          <text class="btn-text">清空历史</text>
+        </button>
+      </view>
+    </view>
+  </view>
+
+  <view class="auth-modal" wx:if="{{showAuthModal}}">
+    <view class="auth-mask" catchtouchmove="catchTouchMove"></view>
+    <view class="auth-panel" catchtouchmove="catchTouchMove">
+      <view class="auth-title">账号登录</view>
+      <view class="auth-subtitle">{{authStatusText}}</view>
+
+      <view class="auth-tabs">
+        <view class="auth-tab {{authMode === 'login' ? 'auth-tab-active' : ''}}" data-mode="login" bindtap="switchAuthMode">登录</view>
+        <view class="auth-tab {{authMode === 'register' ? 'auth-tab-active' : ''}}" data-mode="register" bindtap="switchAuthMode">注册</view>
+      </view>
+
+      <block wx:if="{{authMode === 'login'}}">
+        <input class="auth-input" placeholder="请输入账号" value="{{loginForm.account}}" data-field="account" bindinput="onLoginInput" />
+        <input class="auth-input" placeholder="请输入密码" password value="{{loginForm.password}}" data-field="password" bindinput="onLoginInput" />
+        <button class="auth-submit" bindtap="submitLogin" loading="{{authLoading}}">登录</button>
+        <button class="auth-secondary" bindtap="loginWithTempOpenid" loading="{{authLoading}}">使用微信openid临时登录</button>
+      </block>
+
+      <block wx:else>
+        <input class="auth-input" placeholder="请输入用户名" value="{{registerForm.username}}" data-field="username" bindinput="onRegisterInput" />
+        <input class="auth-input" placeholder="请输入账号" value="{{registerForm.account}}" data-field="account" bindinput="onRegisterInput" />
+        <input class="auth-input" placeholder="请输入密码" password value="{{registerForm.password}}" data-field="password" bindinput="onRegisterInput" />
+        <input class="auth-input" placeholder="请再次输入密码" password value="{{registerForm.confirmPassword}}" data-field="confirmPassword" bindinput="onRegisterInput" />
+        <button class="auth-submit" bindtap="submitRegister" loading="{{authLoading}}">注册并登录</button>
+      </block>
+    </view>
+  </view>
+</view>
