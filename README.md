@@ -82,6 +82,7 @@ front_end_test/
    ├─ index/
    ├─ message/
    └─ currentmodel/
+```
 # Apple Detection Backend
 
 基于 Flask + SQLite 的苹果检测后端服务，用于配合微信小程序前端完成图片上传、目标检测、历史记录查询、模型切换和用户登录等功能。
